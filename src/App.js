@@ -11,33 +11,67 @@ const stock = "TSLA";
 const store = AlphaVantage(AV_API_KEY, stock);
 
 class App extends Component {
+	constructor () {
+		super();
+
+		this.state = {
+			shares: 0,
+		};
+
+		this.handleShareChange = this.handleShareChange.bind(this);
+	}
+
+	handleShareChange (e) {
+		this.setState({ shares: e.target.value });
+	}
 
 	componentDidMount () {
 		store.subscribe(() => this.forceUpdate());
 	}
 
 	render() {
-		const usdFormat = new Intl.NumberFormat('en-US', { style: "currency", currency: "USD" });
-		const gbpFormat = new Intl.NumberFormat('en-GB', { style: "currency", currency: "GBP" });
+		const usdFormatter = new Intl.NumberFormat('en-US', { style: "currency", currency: "USD" });
+		const gbpFormatter = new Intl.NumberFormat('en-GB', { style: "currency", currency: "GBP" });
+
+		const { shares } = this.state;
+
+		const state = store.getState();
+
+		const delta = !!state.values.length && (state.values[0] - state.values[1]);
+
 		return (
 			<div className="App">
 				<header className="App-header">
 					<h1 className="App-title">{stock}</h1>
+					<label>
+						Shares: 
+						<input type="number" value={shares} min={0} onChange={this.handleShareChange} />
+					</label>
 				</header>
 				<div className="App-container">
-					<Graph values={store.state.values} />
+					<Graph values={state.values} />
 					<div className="App-info">
-						{ store.state.value &&
-							<p>{store.state.value.toFixed(3)}</p>
+						{ state.value &&
+							<p>{state.value.toFixed(3)}</p>
 						}
-						{ store.state.value &&
-							<SmearValue value={store.state.value*49} format={usdFormat} />
+						{ state.value && this.state.shares > 0 &&
+							<div>
+								<SmearValue value={state.value*shares} formatter={usdFormatter} />
+								{ delta &&
+									<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares).toFixed(3)} $/min</p>
+								}
+							</div>
 						}
-						{ store.state.value && store.state.exchangeRate &&
-							<SmearValue value={store.state.value*49*store.state.exchangeRate} format={gbpFormat} />
+						{ state.value && this.state.shares > 0 && state.exchangeRate &&
+							<div>
+								<SmearValue value={state.value*shares*state.exchangeRate} formatter={gbpFormatter} />
+								{ delta && state.exchangeRate &&
+									<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares*state.exchangeRate).toFixed(3)} £/min</p>
+								}
+							</div>
 						}
-						{ store.state.updated &&
-							<p>{store.state.updated.toString().substr(0, 24)}</p>
+						{ state.updated &&
+							<SmearValue value={state.updated} formatter={dateFormatter} />
 						}
 					</div>
 				</div>
@@ -47,3 +81,9 @@ class App extends Component {
 }
 
 export default App;
+
+const dateFormatter = {
+	format (time) {
+		return (new Date(time)).toString().substr(0, 24);
+	}
+};

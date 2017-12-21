@@ -1,5 +1,6 @@
 let subscribers = [];
 let isAlive = false;
+let state = {};
 
 function checkIsAlive () {
 	if (!isAlive && subscribers.length) {
@@ -12,13 +13,13 @@ function checkIsAlive () {
 }
 
 function loop () {
-	if (typeof store.state.value === "undefined") {
-		store.state.value = randBetween(500, 1500);
+	if (typeof state.value === "undefined") {
+		state.value = randBetween(500, 1500);
 	}
 	
 	const delta = randBetween(-100, 100);
 	
-	store.state.value += delta;
+	state.value += delta;
 	
 	notifyAll();
 	
@@ -36,7 +37,7 @@ function randBetween(min, max) {
 }
 
 const store = {
-	state: {},
+	getState: () => state,
 	
 	subscribe (callback) {
 		subscribers.push(callback);

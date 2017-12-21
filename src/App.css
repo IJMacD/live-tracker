@@ -12,10 +12,17 @@
   height: 50px;
   padding: 20px;
   color: white;
+  display: flex;
 }
 
 .App-title {
   font-size: 1.5em;
+  flex: 1;
+}
+
+.App-header input {
+  margin-left: 4px;
+  width: 50px;
 }
 
 .App-intro {
@@ -28,16 +35,22 @@
 }
 
 .App-info {
-	position: absolute;
+  position: absolute;
 	right: 0;
-	top: 0;
+  top: 0;
+  display: flex;
+  max-width: 100%;
 }
 
-.App-info p {
+.App-info > * {
 	border: 1px solid #333;
 	padding: 8px;
 	width: 150px;
-	margin: 4px;
+  margin: 4px;
+}
+
+.App-info p {
+  margin: 4px;
 }
 
 @keyframes App-logo-spin {
