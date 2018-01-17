@@ -36,11 +36,19 @@ export default class SmearValue extends Component {
 
 	componentWillReceiveProps (nextProps) {
 		if (nextProps.value !== this.props.value.valueOf()) {
-			const time = 60 * 1000;
-			const delta = (nextProps.value.valueOf() - this.state.value) / (time / step);
-			this.setState({ time, delta });
+			const nextVal =  nextProps.value.valueOf();
+			const diff = nextVal - this.state.value;
 
-			this.loop();
+			if (diff / nextVal > 0.1) {
+				this.setState({ value: nextVal });
+			}
+			else {
+				const time = 60 * 1000;
+				const delta = diff / (time / step);
+				this.setState({ time, delta });
+
+				this.loop();
+			}
 		}
 	}
 
