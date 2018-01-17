@@ -11,18 +11,18 @@ const stock = "TSLA";
 const store = AlphaVantage(AV_API_KEY, stock);
 
 class App extends Component {
-	constructor () {
-		super();
+	constructor (props) {
+		super(props);
 
 		this.state = {
-			shares: 0,
+			shareCount: 0,
 		};
 
 		this.handleShareChange = this.handleShareChange.bind(this);
 	}
 
 	handleShareChange (e) {
-		this.setState({ shares: e.target.value });
+		this.setState({ shareCount: e.target.value });
 	}
 
 	componentDidMount () {
@@ -33,7 +33,7 @@ class App extends Component {
 		const usdFormatter = new Intl.NumberFormat('en-US', { style: "currency", currency: "USD" });
 		const gbpFormatter = new Intl.NumberFormat('en-GB', { style: "currency", currency: "GBP" });
 
-		const { shares } = this.state;
+		const shares = this.state.shareCount;
 
 		const state = store.getState();
 
@@ -42,11 +42,20 @@ class App extends Component {
 		return (
 			<div className="App">
 				<header className="App-header">
-					<h1 className="App-title">{stock}</h1>
-					<label>
-						Shares: 
-						<input type="number" value={shares} min={0} onChange={this.handleShareChange} />
-					</label>
+					<h1 className="App-title">
+						{stock}
+						<input
+							type="number"
+							value={this.state.shareCount}
+							min="0"
+							onChange={this.handleShareChange}
+							style={{
+								marginLeft: 10,
+								width: 100,
+								fontSize: 18,
+							}}
+						/>
+					</h1>
 				</header>
 				<div className="App-container">
 					<Graph values={state.values} />
@@ -54,7 +63,7 @@ class App extends Component {
 						{ state.value &&
 							<p>{state.value.toFixed(3)}</p>
 						}
-						{ state.value && this.state.shares > 0 &&
+						{ state.value && shares > 0 &&
 							<div>
 								<SmearValue value={state.value*shares} formatter={usdFormatter} />
 								{ delta &&
@@ -62,7 +71,7 @@ class App extends Component {
 								}
 							</div>
 						}
-						{ state.value && this.state.shares > 0 && state.exchangeRate &&
+						{ state.value && shares > 0 && state.exchangeRate &&
 							<div>
 								<SmearValue value={state.value*shares*state.exchangeRate} formatter={gbpFormatter} />
 								{ delta && state.exchangeRate &&
