@@ -8,9 +8,13 @@ export default class Graph extends Component {
 
 			const values = this.props.values;
 			const v0 = values[0];
+			const vmin = Math.min(...values);
+			const vmax = Math.max(...values);
 			const xScale = graph_width / this.props.values.length;
 			const yScale = 20;
 			const yOffset = graph_height / 2;
+			const ymin = -(vmin - v0) * yScale + yOffset;
+			const ymax = -(vmax - v0) * yScale + yOffset;
 
 			const ctx = this.canvas.getContext("2d");
 
@@ -21,7 +25,16 @@ export default class Graph extends Component {
 			ctx.beginPath();
 			ctx.moveTo(0, yOffset);
 			ctx.lineTo(graph_width, yOffset);
+			ctx.moveTo(0, ymin);
+			ctx.lineTo(graph_width, ymin);
+			ctx.moveTo(0, ymax);
+			ctx.lineTo(graph_width, ymax);
 			ctx.stroke();
+
+			ctx.fillStyle = "#999";
+			ctx.fillText(v0, 0, yOffset - 2);
+			ctx.fillText(vmin, 0, ymin - 2);
+			ctx.fillText(vmax, 0, ymax - 2);
 
 			ctx.strokeStyle = "#000";
 
