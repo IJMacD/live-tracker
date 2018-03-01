@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 
 const step = 100;
 
+/**
+ * @augments Component<{ value: number, formatter: { format: (number) => string }}, { value: number, delta: number, time: number }>
+ */
 export default class SmearValue extends Component {
 	constructor (props) {
 		super(props);

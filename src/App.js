@@ -16,6 +16,7 @@ class App extends Component {
 
 		this.state = {
 			shareCount: 0,
+			granularity: "1min",
 		};
 
 		this.handleShareChange = this.handleShareChange.bind(this);
@@ -23,6 +24,12 @@ class App extends Component {
 
 	handleShareChange (e) {
 		this.setState({ shareCount: e.target.value });
+	}
+
+	componentDidUpdate (prevProps, prevState) {
+		if (prevState.granularity !== this.state.granularity) {
+			store.setGranularity(this.state.granularity);
+		}
 	}
 
 	componentDidMount () {
@@ -34,6 +41,7 @@ class App extends Component {
 		const gbpFormatter = new Intl.NumberFormat('en-GB', { style: "currency", currency: "GBP" });
 
 		const shares = this.state.shareCount;
+		const granularity = this.state.granularity;
 
 		const state = store.getState();
 
@@ -56,34 +64,43 @@ class App extends Component {
 							}}
 						/>
 					</h1>
+					<button onClick={() => this.setState({ granularity: "1min" })} disabled={granularity === "1min"}>1 min</button>
+					<button onClick={() => this.setState({ granularity: "5min" })} disabled={granularity === "5min"}>5 min</button>
+					<button onClick={() => this.setState({ granularity: "15min" })} disabled={granularity === "15min"}>15 min</button>
+					<button onClick={() => this.setState({ granularity: "30min" })} disabled={granularity === "30min"}>30 min</button>
+					<button onClick={() => this.setState({ granularity: "60min" })} disabled={granularity === "60min"}>60 min</button>
 				</header>
-				<div className="App-container">
-					<Graph values={state.values} />
-					<div className="App-info">
-						{ state.value &&
-							<p>{state.value.toFixed(3)}</p>
-						}
-						{ state.value && shares > 0 &&
-							<div>
-								<SmearValue value={state.value*shares} formatter={usdFormatter} />
-								{ delta &&
-									<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares).toFixed(3)} $/min</p>
-								}
-							</div>
-						}
-						{ state.value && shares > 0 && state.exchangeRate &&
-							<div>
-								<SmearValue value={state.value*shares*state.exchangeRate} formatter={gbpFormatter} />
-								{ delta && state.exchangeRate &&
-									<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares*state.exchangeRate).toFixed(3)} £/min</p>
-								}
-							</div>
-						}
-						{ state.updated &&
-							<SmearValue value={state.updated} formatter={dateFormatter} />
-						}
+				{ state.error ?
+					<h1 style={{ color: "red" }}>{state.error}</h1>
+					:
+					<div className="App-container">
+						<Graph values={state.values} granularity={granularity} updated={state.updated} />
+						<div className="App-info">
+							{ state.value > 0 &&
+								<p>{state.value.toFixed(3)}</p>
+							}
+							{ state.value > 0 && shares > 0 &&
+								<div>
+									<SmearValue value={state.value*shares} formatter={usdFormatter} />
+									{ delta !== 0 &&
+										<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares).toFixed(3)} $/{granularity}</p>
+									}
+								</div>
+							}
+							{ state.value > 0 && shares > 0 && state.exchangeRate &&
+								<div>
+									<SmearValue value={state.value*shares*state.exchangeRate} formatter={gbpFormatter} />
+									{ delta !== 0 && state.exchangeRate &&
+										<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares*state.exchangeRate).toFixed(3)} £/{granularity}</p>
+									}
+								</div>
+							}
+							{ state.updated &&
+								<SmearValue value={state.updated.valueOf()} formatter={dateFormatter} />
+							}
+						</div>
 					</div>
-				</div>
+				}
 			</div>
 		);
 	}
