@@ -71,7 +71,7 @@ export default function (API_KEY, stock) {
 
 			state.values = Object.values(data[key]).map(d => parseFloat(d["4. close"]));
 			state.value = state.values[0]; // 0th value is most recent
-			state.updated = new Date(Object.keys(data[key])[0]);
+			state.updated = parseDate(Object.keys(data[key])[0], data["Meta Data"]["6. Time Zone"]);
 
 			notifyAll();
 
@@ -134,4 +134,18 @@ export default function (API_KEY, stock) {
 	};
 
 	return store;
+}
+
+/**
+ *
+ * @param {string} date
+ * @param {string} timezone
+ * @return {Date}
+ */
+function parseDate (date, timezone) {
+	const tzMap = {
+		"US/Eastern": "-05:00",
+	};
+
+	return new Date(date.replace(' ', 'T') + tzMap[timezone]);
 }
