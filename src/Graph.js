@@ -16,6 +16,7 @@ export default class Graph extends Component {
 
 		if (this.canvas && values && values.length) {
 
+			// Set up paramaters
 			const v0 = values[0];
 			const vmin = Math.min(...values);
 			const vmax = Math.max(...values);
@@ -25,40 +26,65 @@ export default class Graph extends Component {
 			const yOffset = graph_height * 0.95 - (v0 - vmin) * yScale;
 			const ymin = -(vmin - v0) * yScale + yOffset;
 			const ymax = -(vmax - v0) * yScale + yOffset;
+			/** @type {number} Duration in ms */
+			const totalDuration = parseInt(this.props.granularity, 10) * values.length * 60 * 1000;
+			const up = this.props.updated;
 
 			ctx.strokeStyle = "#999";
+			ctx.fillStyle = "#999";
 
 			ctx.beginPath();
 
-			// Horizontal
+			/****************
+			 * Key Lines
+			 ****************/
+
+			// Current Value
 			ctx.moveTo(0, yOffset);
 			ctx.lineTo(graph_width, yOffset);
+			ctx.fillText(v0, 0, yOffset - 2);
+			ctx.stroke();
+
+			// Minimum Value
+			ctx.fillText(vmin, 0, ymin - 2);
+			ctx.beginPath();
+			ctx.strokeStyle = "#944";
+			// H Line
 			ctx.moveTo(0, ymin);
 			ctx.lineTo(graph_width, ymin);
-			ctx.moveTo(0, ymax);
-			ctx.lineTo(graph_width, ymax);
-
-			// Vertical
-			const vmax_f = values.indexOf(vmax) / values.length;
-			const vmax_x = graph_width * (1 - vmax_f);
-			ctx.moveTo(vmax_x, 0);
-			ctx.lineTo(vmax_x, graph_height);
-
+			// V Line
 			const vmin_f = values.indexOf(vmin) / values.length;
 			const vmin_x = graph_width * (1 - vmin_f);
 			ctx.moveTo(vmin_x, 0);
 			ctx.lineTo(vmin_x, graph_height);
-
+			// Min time
+			const diff_min = totalDuration * vmin_f;
+			const d_min = new Date(up.valueOf() - diff_min);
+			ctx.fillText(formatTime(d_min), graph_width * (1 - vmin_f) - 26, yOffset - 2);
 			ctx.stroke();
 
-			ctx.fillStyle = "#999";
-			ctx.fillText(v0, 0, yOffset - 2);
-			ctx.fillText(vmin, 0, ymin - 2);
+			// Maximum Value
 			ctx.fillText(vmax, 0, ymax - 2);
+			ctx.beginPath();
+			ctx.strokeStyle = "#494";
+			// H Line
+			ctx.moveTo(0, ymax);
+			ctx.lineTo(graph_width, ymax);
+			// V Line
+			const vmax_f = values.indexOf(vmax) / values.length;
+			const vmax_x = graph_width * (1 - vmax_f);
+			ctx.moveTo(vmax_x, 0);
+			ctx.lineTo(vmax_x, graph_height);
+			// Max time
+			const diff_max = totalDuration * vmax_f;
+			const d_max = new Date(up.valueOf() - diff_max);
+			ctx.fillText(formatTime(d_max), graph_width * (1 - vmax_f) - 26, yOffset - 2);
+			ctx.stroke();
 
-			const totalDuration = parseInt(this.props.granularity, 10) * values.length * 60 * 1000;
+			/**************
+			 * Times of Day
+			 **************/
 			// Latest Update Time
-			const up = this.props.updated;
 			ctx.fillText(formatTime(up), graph_width - 26, graph_height - 2);
 
 			// Equal time divisions
@@ -69,15 +95,35 @@ export default class Graph extends Component {
 				ctx.fillText(formatTime(d1), graph_width * (1 - i / div) - 26, graph_height - 2);
 			}
 
-			// Max time
-			const diff_max = totalDuration * vmax_f;
-			const d_max = new Date(up.valueOf() - diff_max);
-			ctx.fillText(formatTime(d_max), graph_width * (1 - vmax_f) - 26, yOffset - 2);
-			// Min time
-			const diff_min = totalDuration * vmin_f;
-			const d_min = new Date(up.valueOf() - diff_min);
-			ctx.fillText(formatTime(d_min), graph_width * (1 - vmin_f) - 26, yOffset - 2);
+			// Midnights
+			ctx.beginPath();
+			ctx.strokeStyle = "#449";
 
+			const days = totalDuration / (24 * 60 * 60 * 1000);
+			const l = days + 1;
+			let i = 0;
+			do {
+				const t0 = new Date(+up - (totalDuration * (i / l)));
+				const t1 = new Date(+up - (totalDuration * ((i + 1) / l)));
+				if (t0.getDate() !== t1.getDate()){
+					const midnight = new Date(t0);
+					midnight.setHours(0, 0, 0, 0);
+					// V Line
+					const midnight_f = (+up - +midnight) / totalDuration;
+					const midnight_x = graph_width * (1 - midnight_f);
+					ctx.moveTo(midnight_x, 0);
+					ctx.lineTo(midnight_x, graph_height);
+				}
+
+				i++;
+			} while (i < l);
+
+			ctx.stroke();
+
+
+			/********************
+			 * Plot actual graph
+			 ********************/
 			ctx.strokeStyle = "#000";
 
 			ctx.beginPath();
