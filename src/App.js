@@ -9,26 +9,34 @@ import './App.css';
 const AV_API_KEY = "AAKDZB35OJ9KVSWP";
 const stock = "TSLA";
 const store = AlphaVantage(AV_API_KEY, stock);
+const STORAGE_KEY = "LT_STATE";
 
 class App extends Component {
 	constructor (props) {
 		super(props);
 
-		this.state = {
+		const savedState = getSavedState();
+
+		this.state = Object.assign({
 			shareCount: 0,
 			granularity: "1min",
-		};
+		}, savedState);
+
+		store.setGranularity(this.state.granularity);
 
 		this.handleShareChange = this.handleShareChange.bind(this);
 	}
 
 	handleShareChange (e) {
-		this.setState({ shareCount: e.target.value });
+		const newState = { shareCount: e.target.value };
+		this.setState(newState);
+		setSavedState(newState);
 	}
 
 	componentDidUpdate (prevProps, prevState) {
 		if (prevState.granularity !== this.state.granularity) {
 			store.setGranularity(this.state.granularity);
+			setSavedState({ granularity: this.state.granularity });
 		}
 	}
 
@@ -118,3 +126,14 @@ const dateFormatter = {
 		return (new Date(time)).toString().substr(0, 24);
 	}
 };
+
+function getSavedState() {
+	return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+}
+
+function setSavedState (newState) {
+	const state = getSavedState();
+	Object.assign(state, newState);
+
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
