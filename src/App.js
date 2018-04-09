@@ -70,37 +70,42 @@ class App extends Component {
 					<button onClick={() => this.setState({ granularity: "30min" })} disabled={granularity === "30min"}>30 min</button>
 					<button onClick={() => this.setState({ granularity: "60min" })} disabled={granularity === "60min"}>60 min</button>
 				</header>
-				{ state.error ?
-					<h1 style={{ color: "red" }}>{state.error}</h1>
-					:
-					<div className="App-container">
-						<Graph values={state.values} granularity={granularity} updated={state.updated} />
-						<div className="App-info">
-							{ state.value > 0 &&
-								<p>{state.value.toFixed(3)}</p>
-							}
-							{ state.value > 0 && shares > 0 &&
-								<div>
-									<SmearValue value={state.value*shares} formatter={usdFormatter} />
-									{ delta !== 0 &&
-										<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares).toFixed(3)} $/{granularity}</p>
-									}
-								</div>
-							}
-							{ state.value > 0 && shares > 0 && state.exchangeRate &&
-								<div>
-									<SmearValue value={state.value*shares*state.exchangeRate} formatter={gbpFormatter} />
-									{ delta !== 0 && state.exchangeRate &&
-										<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares*state.exchangeRate).toFixed(3)} £/{granularity}</p>
-									}
-								</div>
-							}
-							{ state.updated &&
-								<SmearValue value={state.updated.valueOf()} formatter={dateFormatter} />
-							}
+				<div className="App-container">
+					{ state.error &&
+						<h1 style={{ color: "red", position: "absolute", width: "100%" }}>{state.error}</h1>
+					}
+					{ state.values && state.values.length > 0 ?
+						<div>
+							<Graph values={state.values} granularity={granularity} updated={state.updated} />
+							<div className="App-info">
+								{ state.value > 0 &&
+									<p>{state.value.toFixed(3)}</p>
+								}
+								{ state.value > 0 && shares > 0 &&
+									<div>
+										<SmearValue value={state.value*shares} formatter={usdFormatter} />
+										{ delta !== 0 &&
+											<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares).toFixed(3)} $/{granularity}</p>
+										}
+									</div>
+								}
+								{ state.value > 0 && shares > 0 && state.exchangeRate &&
+									<div>
+										<SmearValue value={state.value*shares*state.exchangeRate} formatter={gbpFormatter} />
+										{ delta !== 0 && state.exchangeRate &&
+											<p style={{ color: delta > 0 ? "#3f3" : "#f33" }}>{(delta*shares*state.exchangeRate).toFixed(3)} £/{granularity}</p>
+										}
+									</div>
+								}
+								{ state.updated &&
+									<SmearValue value={state.updated.valueOf()} formatter={dateFormatter} />
+								}
+							</div>
 						</div>
-					</div>
-				}
+					:
+						!state.error && <p>Loading</p>
+					}
+				</div>
 			</div>
 		);
 	}

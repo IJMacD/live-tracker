@@ -31,7 +31,6 @@
 
 .App-container {
 	position: relative;
-	display: inline-block;
 }
 
 .App-info {
@@ -52,6 +51,10 @@
 
 .App-info p {
   margin: 4px;
+}
+
+canvas {
+  margin-top: 40px;
 }
 
 @keyframes App-logo-spin {
