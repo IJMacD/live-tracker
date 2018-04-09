@@ -1,3 +1,5 @@
+import moment from 'moment-timezone';
+
 export default function (API_KEY, stock) {
 	/** @type { (() => void)[] } */
 	let subscribers = [];
@@ -60,6 +62,12 @@ export default function (API_KEY, stock) {
 			}
 
 			const interval = data["Meta Data"]["4. Interval"];
+
+			if (interval !== granularity) {
+				// Fetch is stale, drop
+				return;
+			}
+
 			const key = `Time Series (${interval})`;
 
 			if (!data[key]) {
@@ -122,6 +130,7 @@ export default function (API_KEY, stock) {
 			granularity = g;
 
 			state.values.length = 0;
+			state.error = null;
 			notifyAll();
 
 			if (timeout) {
@@ -143,9 +152,5 @@ export default function (API_KEY, stock) {
  * @return {Date}
  */
 function parseDate (date, timezone) {
-	const tzMap = {
-		"US/Eastern": "-05:00",
-	};
-
-	return new Date(date.replace(' ', 'T') + tzMap[timezone]);
+	return moment.tz(date.replace(' ', 'T'), timezone).toDate();
 }
