@@ -33,13 +33,14 @@ export default class Graph extends Component {
 			ctx.strokeStyle = "#999";
 			ctx.fillStyle = "#999";
 
-			ctx.beginPath();
 
 			/****************
 			 * Key Lines
 			 ****************/
 
 			// Current Value
+			ctx.beginPath();
+			ctx.strokeStyle = "#333";
 			ctx.moveTo(0, yOffset);
 			ctx.lineTo(graph_width, yOffset);
 			ctx.fillText(v0, 0, yOffset - 2);
@@ -60,7 +61,7 @@ export default class Graph extends Component {
 			// Min time
 			const diff_min = totalDuration * vmin_f;
 			const d_min = new Date(up.valueOf() - diff_min);
-			ctx.fillText(formatTime(d_min), graph_width * (1 - vmin_f) - 26, yOffset - 2);
+			ctx.fillText(formatTime(d_min), graph_width * (1 - vmin_f) - 28, graph_height - 2);
 			ctx.stroke();
 
 			// Maximum Value
@@ -78,8 +79,30 @@ export default class Graph extends Component {
 			// Max time
 			const diff_max = totalDuration * vmax_f;
 			const d_max = new Date(up.valueOf() - diff_max);
-			ctx.fillText(formatTime(d_max), graph_width * (1 - vmax_f) - 26, yOffset - 2);
+			ctx.fillText(formatTime(d_max), graph_width * (1 - vmax_f) - 28, graph_height - 2);
 			ctx.stroke();
+
+
+			/*********************
+			 * Cent Lines
+			 *********************/
+			ctx.beginPath();
+			ctx.strokeStyle = "#ccc";
+
+			const pixelsPerCent = yScale;
+			const startCentFrac = vmin - Math.floor(vmin);
+			const startCentOffset = startCentFrac * pixelsPerCent;
+
+			let p = Math.floor(vmin);
+
+			for(let y = ymin + startCentOffset; y > 0; y -= pixelsPerCent) {
+				ctx.moveTo(0, y);
+				ctx.lineTo(graph_width, y);
+				ctx.fillText(p++, graph_width - 16, y-2);
+			}
+
+			ctx.stroke();
+
 
 			/**************
 			 * Times of Day
@@ -87,36 +110,39 @@ export default class Graph extends Component {
 			// Latest Update Time
 			ctx.fillText(formatTime(up), graph_width - 26, graph_height - 2);
 
-			// Equal time divisions
-			const div = 5;
-			for (let i = 1; i < div; i++) {
-				const diff1 = totalDuration * (i / div);
-				const d1 = new Date(up.valueOf() - diff1);
-				ctx.fillText(formatTime(d1), graph_width * (1 - i / div) - 26, graph_height - 2);
-			}
-
 			// Midnights
 			ctx.beginPath();
-			ctx.strokeStyle = "#449";
+			ctx.strokeStyle = "#333";
 
-			const days = totalDuration / (24 * 60 * 60 * 1000);
-			const l = days + 1;
-			let i = 0;
-			do {
-				const t0 = new Date(+up - (totalDuration * (i / l)));
-				const t1 = new Date(+up - (totalDuration * ((i + 1) / l)));
-				if (t0.getDate() !== t1.getDate()){
-					const midnight = new Date(t0);
-					midnight.setHours(0, 0, 0, 0);
-					// V Line
-					const midnight_f = (+up - +midnight) / totalDuration;
-					const midnight_x = graph_width * (1 - midnight_f);
-					ctx.moveTo(midnight_x, 0);
-					ctx.lineTo(midnight_x, graph_height);
-				}
+			const numDays = totalDuration / (24 * 60 * 60 * 1000);
+			const pixelsPerDay = graph_width / numDays;
+			const startDayFrac = (up.getHours() + (up.getMinutes() + (up.getSeconds() / 60)) / 60) / 24;
+			const startDayOffset = startDayFrac * pixelsPerDay;
 
-				i++;
-			} while (i < l);
+			for(let x = graph_width - startDayOffset; x > 0; x -= pixelsPerDay) {
+				ctx.moveTo(x, 0);
+				ctx.lineTo(x, graph_height);
+			}
+
+			ctx.stroke();
+
+			// Hours
+			ctx.beginPath();
+			ctx.strokeStyle = "#ccc";
+
+			const numHours = totalDuration / (60 * 60 * 1000);
+			const pixelsPerHour = graph_width / numHours;
+			const startHourFrac = (up.getMinutes() + (up.getSeconds() / 60)) / 60;
+			const startHourOffset = startHourFrac * pixelsPerHour;
+
+			let h = up.getHours();
+
+			for(let x = graph_width - startHourOffset; x > 0; x -= pixelsPerHour) {
+				ctx.moveTo(x, 0);
+				ctx.lineTo(x, graph_height);
+				ctx.fillText(`${pad(h)}:00`, x - 26, graph_height - 2);
+				h = (h + 24 - 1) % 24;
+			}
 
 			ctx.stroke();
 
