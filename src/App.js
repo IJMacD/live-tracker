@@ -87,7 +87,7 @@ class App extends Component {
 							<Graph values={state.values} granularity={granularity} updated={state.updated} />
 							<div className="App-info">
 								{ state.value > 0 &&
-									<p>{state.value.toFixed(3)}</p>
+									<p style={{ fontSize: 36 }}>{state.value.toFixed(3)}</p>
 								}
 								{ state.value > 0 && shares > 0 &&
 									<div>
