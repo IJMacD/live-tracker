@@ -55,6 +55,7 @@
 
 canvas {
   margin-top: 40px;
+  max-width: 100%;
 }
 
 @keyframes App-logo-spin {
