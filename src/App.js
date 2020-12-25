@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import * as AlphaVantage from './AlphaVantage';
 
 import './App.css';
-import { StockDisplay } from './StockDisplay';
+import { TimeDelayStockDisplay } from './TimeDelayStockDisplay';
 
 const AV_API_KEY = "AAKDZB35OJ9KVSWP";
 const stock = "TSLA";
@@ -75,7 +75,7 @@ class App extends Component {
 					<button onClick={() => this.setState({ granularity: "30min" })} disabled={granularity === "30min"}>30 min</button>
 					<button onClick={() => this.setState({ granularity: "60min" })} disabled={granularity === "60min"}>60 min</button>
 				</header>
-				<StockDisplay stock={fexState} volume={55000} granularity={granularity} />
+				<TimeDelayStockDisplay stock={fexState} volume={55000} granularity={granularity} />
 				{/* <StockDisplay stock={stockState} volume={this.state.shareCount} granularity={granularity} /> */}
 			</div>
 		);

@@ -128,6 +128,7 @@ export function stock (API_KEY, stock) {
 					error: null,
 					values: Object.values(data[key]).map(d => parseFloat(d["4. close"])),
 					updated: parseDate(Object.keys(data[key])[0], data["Meta Data"]["6. Time Zone"]),
+					delta: parseInt(interval) * 60 * 1000,
 				};
 
 				state.value = state.values[0]; // 0th value is most recent
@@ -194,6 +195,7 @@ export function fex (API_KEY, from_currency, to_currency) {
 					error: null,
 					values: Object.values(data[key]).map(d => parseFloat(d["4. close"])),
 					updated: parseDate(Object.keys(data[key])[0], data["Meta Data"]["7. Time Zone"]),
+					delta: parseInt(interval) * 60 * 1000,
 				};
 
 				state.value = state.values[0]; // 0th value is most recent

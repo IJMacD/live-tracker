@@ -10,6 +10,8 @@ export default class Graph extends Component {
 	doImperitiveStuff () {
 		const ctx = this.canvas.getContext("2d");
 
+		ctx.save();
+
 		ctx.clearRect(0,0,graph_width,graph_height);
 
 		const values = this.props.values;
@@ -30,6 +32,17 @@ export default class Graph extends Component {
 			const totalDuration = parseInt(this.props.granularity, 10) * values.length * 60 * 1000;
 			const up = this.props.updated;
 
+			if (this.props.timeDelay) {
+				const delta = up - this.props.timeDelay;
+
+				if (delta > 0) {
+					const msPerPixel = totalDuration / graph_width;
+					const pixelsPerMs = 1 / msPerPixel;
+
+					ctx.translate(delta * pixelsPerMs, 0);
+				}
+			}
+
 			ctx.strokeStyle = "#999";
 			ctx.fillStyle = "#999";
 
@@ -39,12 +52,24 @@ export default class Graph extends Component {
 			 ****************/
 
 			// Current Value
-			ctx.beginPath();
-			ctx.strokeStyle = "#333";
-			ctx.moveTo(0, yOffset);
-			ctx.lineTo(graph_width, yOffset);
-			ctx.fillText(v0, 0, yOffset - 2);
-			ctx.stroke();
+			if (this.props.value) {
+				// Override value
+				const y = -(this.props.value - v0) * yScale + yOffset;
+
+				ctx.beginPath();
+				ctx.strokeStyle = "#333";
+				ctx.moveTo(0, y);
+				ctx.lineTo(graph_width, y);
+				ctx.fillText(this.props.value.toFixed(3), 0, y - 2);
+				ctx.stroke();
+			} else {
+				ctx.beginPath();
+				ctx.strokeStyle = "#333";
+				ctx.moveTo(0, yOffset);
+				ctx.lineTo(graph_width, yOffset);
+				ctx.fillText(v0, 0, yOffset - 2);
+				ctx.stroke();
+			}
 
 			// Minimum Value
 			ctx.fillText(vmin, 0, ymin - 2);
@@ -167,6 +192,8 @@ export default class Graph extends Component {
 			});
 
 			ctx.stroke();
+
+			ctx.restore();
 		}
 	}
 
